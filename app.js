@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
         escola: document.getElementById('search-escola')
     };
 
-    // Mapping between JS input keys and the exact JSON object keys from the Excel conversion
+    // Mapping between JS input keys and the exact JSON object keys from the sanitized JSON
     const keyMap = {
-        nome: ' NOME',
-        categoria: ' CATEGORIA',
-        descricao: ' DESCRIÇÃO DO CARGO/PROFISSÃO',
-        email: ' E-MAIL',
-        whatsapp: ' WHATSAPP',
-        cidade: ' CIDADE',
-        escola: ' NOME DA ESCOLA OU SETOR DA SEE'
+        nome: 'NOME',
+        categoria: 'CATEGORIA',
+        descricao: 'DESCRIÇÃO DO CARGO/PROFISSÃO',
+        email: 'E-MAIL',
+        whatsapp: 'WHATSAPP',
+        cidade: 'CIDADE',
+        escola: 'NOME DA ESCOLA OU SETOR DA SEE'
     };
 
     // ======== State ========
@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleSearchInput() {
         if (!isDataLoaded) return;
 
-        // Collect all active filters (converted to lowercase for case-insensitive search)
+        // Collect all active filters (converted to lowercase and normalized for case-insensitive/accent-insensitive search)
         const filters = {};
         let hasActiveFilters = false;
 
         for (const [key, inputEl] of Object.entries(inputs)) {
-            const val = inputEl.value.trim().toLowerCase();
+            const val = normalizeText(inputEl.value);
             if (val.length > 0) {
                 filters[key] = val;
                 hasActiveFilters = true;
@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return false;
                 }
 
-                // Convert para string (para cobrir números como telefones, CEPs, etc) e minúsculo
-                const stringValue = String(cellValue).toLowerCase();
+                // Normaliza a string do banco também (remover acentos + lower case)
+                const stringValue = normalizeText(String(cellValue));
 
                 // Verifica se o texto digitado ESTÁ CONTIDO na célula do banco
                 if (!stringValue.includes(filterValue)) {
@@ -141,18 +141,51 @@ document.addEventListener('DOMContentLoaded', () => {
         briefcase: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`
     };
 
-    // Função para destacar o termo pesquisado
+    // Função para destacar o termo pesquisado com XSS Mitigation (Usando DOM nodes ao invés de string replacement direto)
     function highlightText(text, filterObj, fieldKey) {
-        if (!text) return '-';
+        if (!text) return document.createTextNode('-');
         const str = String(text);
 
-        // Verifica se há termo de busca para este campo específico
-        if (filterObj && filterObj[fieldKey]) {
-            const searchTerm = filterObj[fieldKey];
-            const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
-            return str.replace(regex, '<mark>$1</mark>');
+        // Se não houver filtro, não destoa. Retorna puro Node text (impede execução de HTML).
+        if (!filterObj || !filterObj[fieldKey]) {
+            return document.createTextNode(str);
         }
-        return str;
+
+        const searchTerm = filterObj[fieldKey];
+        // Encontra os matchs escapando
+        const normStr = normalizeText(str);
+        const normTerm = searchTerm; // já vem normalizado
+
+        let matchIndex = normStr.indexOf(normTerm);
+        // Se incrivelmente ele passou no filtro geral mas aqui não achou o índice, só retorna o node limpo
+        if (matchIndex === -1) {
+            return document.createTextNode(str);
+        }
+
+        // Crio um fragmento para armazenar nós textuais + mark
+        const fragment = document.createDocumentFragment();
+
+        // Pedaço antes da busca
+        const beforeMatch = str.substring(0, matchIndex);
+        if (beforeMatch) fragment.appendChild(document.createTextNode(beforeMatch));
+
+        // O pedaço Destacado (o que a pessoa achou)
+        const matchText = str.substring(matchIndex, matchIndex + searchTerm.length);
+        const markNode = document.createElement('mark');
+        markNode.textContent = matchText; // textContent é imune a XSS
+        fragment.appendChild(markNode);
+
+        // O pedaço depois da busca
+        const afterMatch = str.substring(matchIndex + searchTerm.length);
+        if (afterMatch) fragment.appendChild(document.createTextNode(afterMatch));
+
+        return fragment;
+    }
+
+    // Normalizador de texto: retira acentos (diacríticos) e converte minúsculo
+    function normalizeText(string) {
+        if (!string) return '';
+        return string.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
     }
 
     function escapeRegExp(string) {
@@ -184,8 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show feedback on mobile
         showMobileFeedback(countText);
 
-        // Build HTML for all cards
-        let htmlContent = '';
+        // Build HTML for all cards with Safe DOM manipulation
+        resultsListEl.innerHTML = ''; // Clear Previous
+        const docFragment = document.createDocumentFragment();
 
         results.forEach(contact => {
             // Helpers
@@ -195,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = contact[keyMap.email] || '';
             const whats = contact[keyMap.whatsapp] || '';
             const city = contact[keyMap.cidade] || '';
-            const uf = contact[' UF/STATE'] || '';
+            const uf = contact['UF/STATE'] || '';
             const escola = contact[keyMap.escola] || '';
 
             // Format City State
@@ -203,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (city && uf) location = `${city} - ${uf}`;
             else if (uf) location = uf;
 
-            // Highlighted HTMLs
+            // Highlight Nodes
             const hNome = highlightText(nome, currentFilters, 'nome');
             const hCat = highlightText(cat, currentFilters, 'categoria');
             const hDesc = highlightText(desc, currentFilters, 'descricao');
@@ -212,65 +246,68 @@ document.addEventListener('DOMContentLoaded', () => {
             const hCity = highlightText(location, currentFilters, 'cidade');
             const hEscola = highlightText(escola, currentFilters, 'escola');
 
-            htmlContent += `
-                <div class="contact-card">
-                    <div class="card-header">
-                        <div class="contact-name">${hNome}</div>
-                        ${cat ? `<div class="contact-cat">${hCat}</div>` : ''}
-                    </div>
-                    
-                    <div class="card-body">
-                        ${desc ? `
-                        <div class="data-row">
-                            <div class="data-icon">${icons.briefcase}</div>
-                            <div class="data-content">
-                                <span class="data-label">Descrição / Cargo</span>
-                                <span class="data-value">${hDesc}</span>
-                            </div>
-                        </div>` : ''}
+            // Creating the whole card utilizing DOM APIs protects against Injection.
+            // Even if "nome" contains `<img src=x onerror=alert(1)>`, it will be treated as plain literal text.
+            const card = document.createElement('div');
+            card.className = 'contact-card';
 
-                        ${escola ? `
-                        <div class="data-row">
-                            <div class="data-icon">${icons.school}</div>
-                            <div class="data-content">
-                                <span class="data-label">Escola / Instituição</span>
-                                <span class="data-value">${hEscola}</span>
-                            </div>
-                        </div>` : ''}
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header';
 
-                        ${(city || uf) ? `
-                        <div class="data-row">
-                            <div class="data-icon">${icons.mapPin}</div>
-                            <div class="data-content">
-                                <span class="data-label">Cidade</span>
-                                <span class="data-value">${hCity}</span>
-                            </div>
-                        </div>` : ''}
+            const nameEl = document.createElement('div');
+            nameEl.className = 'contact-name';
+            nameEl.appendChild(hNome);
+            cardHeader.appendChild(nameEl);
 
-                        ${email ? `
-                        <div class="data-row">
-                            <div class="data-icon">${icons.mail}</div>
-                            <div class="data-content">
-                                <span class="data-label">E-mail</span>
-                                <span class="data-value">${hEmail}</span>
-                            </div>
-                        </div>` : ''}
+            if (cat) {
+                const catEl = document.createElement('div');
+                catEl.className = 'contact-cat';
+                catEl.appendChild(hCat);
+                cardHeader.appendChild(catEl);
+            }
+            card.appendChild(cardHeader);
 
-                        ${whats ? `
-                        <div class="data-row">
-                            <div class="data-icon">${icons.phone}</div>
-                            <div class="data-content">
-                                <span class="data-label">WhatsApp</span>
-                                <span class="data-value">${hWhats}</span>
-                            </div>
-                        </div>` : ''}
-                    </div>
-                </div>
-            `;
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const addDataRow = (iconHtml, labelText, valueNode) => {
+                const row = document.createElement('div');
+                row.className = 'data-row';
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'data-icon';
+                iconDiv.innerHTML = iconHtml; // SVG icons are safe constants defined above
+                row.appendChild(iconDiv);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'data-content';
+
+                const labelDiv = document.createElement('span');
+                labelDiv.className = 'data-label';
+                labelDiv.textContent = labelText;
+                contentDiv.appendChild(labelDiv);
+
+                const valueDiv = document.createElement('span');
+                valueDiv.className = 'data-value';
+                valueDiv.appendChild(valueNode);
+                contentDiv.appendChild(valueDiv);
+
+                row.appendChild(contentDiv);
+                cardBody.appendChild(row);
+            };
+
+            if (desc) addDataRow(icons.briefcase, 'Descrição / Cargo', hDesc);
+            if (escola) addDataRow(icons.school, 'Escola / Instituição', hEscola);
+            if (city || uf) addDataRow(icons.mapPin, 'Cidade', hCity);
+            if (email) addDataRow(icons.mail, 'E-mail', hEmail);
+            if (whats) addDataRow(icons.phone, 'WhatsApp', hWhats);
+
+            card.appendChild(cardBody);
+            docFragment.appendChild(card);
         });
 
-        // Inject into DOM
-        resultsListEl.innerHTML = htmlContent;
+        // Inject Safe Nodes into DOM
+        resultsListEl.appendChild(docFragment);
     }
 
     function resetView() {
