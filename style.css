@@ -450,6 +450,17 @@ a.wa-link:hover {
     text-decoration: underline;
 }
 
+a.email-link {
+    color: var(--clr-primary);
+    font-weight: 500;
+}
+
+a.email-link:hover {
+    color: #60a5fa;
+    /* Blue 400 */
+    text-decoration: underline;
+}
+
 /* Highlights in text when searched */
 mark {
     background-color: rgba(250, 204, 21, 0.2);

@@ -310,7 +310,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (desc) addDataRow(icons.briefcase, 'Descrição / Cargo', hDesc);
             if (escola) addDataRow(icons.school, 'Escola / Instituição', hEscola);
             if (city || uf) addDataRow(icons.mapPin, 'Cidade', hCity);
-            if (email) addDataRow(icons.mail, 'E-mail', hEmail);
+
+            if (email) {
+                addDataRow(icons.mail, 'E-mail', hEmail, {
+                    url: `mailto:${email.trim()}`,
+                    className: 'email-link',
+                    title: 'Enviar e-mail'
+                });
+            }
 
             if (whats) {
                 // Remove todos os não-números para o link do WhatsApp
