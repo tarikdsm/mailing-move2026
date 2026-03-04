@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const noResultsEl = document.getElementById('no-results');
     const clearFiltersBtn = document.getElementById('clear-filters');
 
+    // Mobile specific elements
+    const mobileFeedbackEl = document.getElementById('mobile-feedback');
+    const mobileResultsCountEl = document.getElementById('mobile-results-count');
+    const scrollToResultsBtn = document.getElementById('scroll-to-results');
+
     // Inputs
     const inputs = {
         nome: document.getElementById('search-nome'),
@@ -163,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             noResultsEl.classList.add('visible');
             resultsListEl.innerHTML = '';
             currentResultsEl.textContent = '0';
+            hideMobileFeedback();
             return;
         }
 
@@ -174,6 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
             countText = `${maxDisplay} de ${totalFound}`;
         }
         currentResultsEl.textContent = countText;
+
+        // Show feedback on mobile
+        showMobileFeedback(countText);
 
         // Build HTML for all cards
         let htmlContent = '';
@@ -269,6 +278,25 @@ document.addEventListener('DOMContentLoaded', () => {
         currentResultsEl.textContent = '0';
         noResultsEl.classList.remove('visible');
         initialStateEl.classList.add('visible');
+        hideMobileFeedback();
+    }
+
+    // ======== Mobile Feedback Handlers ========
+    let feedbackTimeout;
+
+    function showMobileFeedback(count) {
+        if (window.innerWidth > 768) return; // Only relevant for mobile
+
+        mobileResultsCountEl.textContent = count;
+        mobileFeedbackEl.classList.add('visible');
+
+        // Auto-hide the toast after 4 seconds of inactivity
+        clearTimeout(feedbackTimeout);
+        feedbackTimeout = setTimeout(hideMobileFeedback, 4000);
+    }
+
+    function hideMobileFeedback() {
+        mobileFeedbackEl.classList.remove('visible');
     }
 
     // ======== Event Listeners ========
@@ -289,6 +317,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         resetView();
     });
+
+    // Mobile scroll button
+    scrollToResultsBtn.addEventListener('click', () => {
+        // Obter uma estimativa justa da seção de resultados
+        const yOffset = -20;
+        const element = document.querySelector('.results-section');
+        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        hideMobileFeedback();
+    });
+
+    // Hide mobile feedback when actively scrolling down normally
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300 && mobileFeedbackEl.classList.contains('visible')) {
+            // Se o usuário rolou a página ele mesmo, sumir com o toast para não poluir
+            hideMobileFeedback();
+        }
+    }, { passive: true });
 
     // Initialize fetching
     loadData();

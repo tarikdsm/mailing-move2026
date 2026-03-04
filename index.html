@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-container">
-        
+
         <header class="hero-section">
             <div class="hero-content">
                 <div class="logo-area">
@@ -36,59 +38,64 @@
                         <label for="search-nome">Nome</label>
                         <input type="text" id="search-nome" placeholder="John Doe..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-categoria">Categoria</label>
                         <input type="text" id="search-categoria" placeholder="Professor, Diretor..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-descricao">Descrição</label>
                         <input type="text" id="search-descricao" placeholder="Cargo/Profissão..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-email">E-mail</label>
                         <input type="text" id="search-email" placeholder="email@dominio.com..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-whatsapp">Whatsapp</label>
                         <input type="text" id="search-whatsapp" placeholder="(00) 00000-0000..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-cidade">Cidade</label>
                         <input type="text" id="search-cidade" placeholder="São Paulo..." autocomplete="off">
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="search-escola">Nome da Escola</label>
                         <input type="text" id="search-escola" placeholder="EE Escola..." autocomplete="off">
                     </div>
                 </div>
-                
+
                 <div class="search-actions">
                     <button id="clear-filters" class="btn-clear">Limpar Filtros</button>
-                    <div class="results-stats">Exibindo <span class="highlight" id="current-results">0</span> resultados</div>
+                    <div class="results-stats">Exibindo <span class="highlight" id="current-results">0</span> resultados
+                    </div>
                 </div>
             </section>
 
             <section class="results-section">
                 <!-- Estado inicial / Vazio -->
                 <div id="initial-state" class="empty-state visible">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <h3>Pronto para Pesquisar</h3>
                     <p>Comece a digitar em qualquer um dos campos acima para ver os resultados aparecerem aqui.</p>
                 </div>
-                
+
                 <!-- Resultados não encontrados -->
                 <div id="no-results" class="empty-state">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
                         <line x1="12" y1="9" x2="12" y2="13"></line>
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
@@ -101,12 +108,24 @@
                     <!-- Cards de contatos serão injetados aqui via JS -->
                 </div>
             </section>
+
+            <!-- Mobile View Feedback Indicator -->
+            <div id="mobile-feedback" class="mobile-feedback hidden">
+                <button id="scroll-to-results" class="btn-scroll">
+                    <span id="mobile-results-count">0</span> encontrados
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
         </main>
-        
+
         <footer>
             <p>Mailing MOVE 2026 - Dados 100% Pesquisáveis</p>
         </footer>
     </div>
     <script src="app.js"></script>
 </body>
+
 </html>
