@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailing MOVE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <header class="hero-section">
+            <div class="hero-content">
+                <div class="logo-area">
+                    <span class="logo-icon">M</span>
+                    <h1>Mailing MOVE 2026</h1>
+                </div>
+                <p class="stats-badge">
+                    <span id="total-contacts">0</span> Contatos Disponíveis
+                </p>
+                <div class="intro-text">
+                    <p>Pesquise contatos em tempo real. Digite para filtrar os resultados abaixo.</p>
+                </div>
+            </div>
+            <div class="background-decorations">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="search-section">
+                <div class="search-grid">
+                    <div class="input-group">
+                        <label for="search-nome">Nome</label>
+                        <input type="text" id="search-nome" placeholder="John Doe..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-categoria">Categoria</label>
+                        <input type="text" id="search-categoria" placeholder="Professor, Diretor..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-descricao">Descrição</label>
+                        <input type="text" id="search-descricao" placeholder="Cargo/Profissão..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-email">E-mail</label>
+                        <input type="text" id="search-email" placeholder="email@dominio.com..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-whatsapp">Whatsapp</label>
+                        <input type="text" id="search-whatsapp" placeholder="(00) 00000-0000..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-cidade">Cidade</label>
+                        <input type="text" id="search-cidade" placeholder="São Paulo..." autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="search-escola">Nome da Escola</label>
+                        <input type="text" id="search-escola" placeholder="EE Escola..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="search-actions">
+                    <button id="clear-filters" class="btn-clear">Limpar Filtros</button>
+                    <div class="results-stats">Exibindo <span class="highlight" id="current-results">0</span> resultados</div>
+                </div>
+            </section>
+
+            <section class="results-section">
+                <!-- Estado inicial / Vazio -->
+                <div id="initial-state" class="empty-state visible">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h3>Pronto para Pesquisar</h3>
+                    <p>Comece a digitar em qualquer um dos campos acima para ver os resultados aparecerem aqui.</p>
+                </div>
+                
+                <!-- Resultados não encontrados -->
+                <div id="no-results" class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <h3>Nenhum resultado encontrado</h3>
+                    <p>Tente ajustar os termos da sua pesquisa.</p>
+                </div>
+
+                <!-- Lista de Resultados -->
+                <div id="results-list" class="results-grid">
+                    <!-- Cards de contatos serão injetados aqui via JS -->
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Mailing MOVE 2026 - Dados 100% Pesquisáveis</p>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
