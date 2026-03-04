@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardBody = document.createElement('div');
             cardBody.className = 'card-body';
 
-            const addDataRow = (iconHtml, labelText, valueNode) => {
+            const addDataRow = (iconHtml, labelText, valueNode, linkConfig = null) => {
                 const row = document.createElement('div');
                 row.className = 'data-row';
 
@@ -287,10 +287,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 labelDiv.textContent = labelText;
                 contentDiv.appendChild(labelDiv);
 
-                const valueDiv = document.createElement('span');
-                valueDiv.className = 'data-value';
-                valueDiv.appendChild(valueNode);
-                contentDiv.appendChild(valueDiv);
+                let valueOuter;
+                if (linkConfig && linkConfig.url) {
+                    valueOuter = document.createElement('a');
+                    valueOuter.href = linkConfig.url;
+                    valueOuter.className = 'data-value link-action ' + (linkConfig.className || '');
+                    valueOuter.target = '_blank';
+                    valueOuter.rel = 'noopener noreferrer';
+                    valueOuter.title = linkConfig.title || '';
+                } else {
+                    valueOuter = document.createElement('span');
+                    valueOuter.className = 'data-value';
+                }
+
+                valueOuter.appendChild(valueNode);
+                contentDiv.appendChild(valueOuter);
 
                 row.appendChild(contentDiv);
                 cardBody.appendChild(row);
@@ -300,7 +311,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (escola) addDataRow(icons.school, 'Escola / Instituição', hEscola);
             if (city || uf) addDataRow(icons.mapPin, 'Cidade', hCity);
             if (email) addDataRow(icons.mail, 'E-mail', hEmail);
-            if (whats) addDataRow(icons.phone, 'WhatsApp', hWhats);
+
+            if (whats) {
+                // Remove todos os não-números para o link do WhatsApp
+                const justNumbers = String(whats).replace(/\D/g, '');
+                let waUrl = null;
+
+                // Se tiver 10 ou 11 dígitos, é um celular válido com DDD do Brasil
+                if (justNumbers.length >= 10) {
+                    waUrl = `https://wa.me/55${justNumbers}`;
+                }
+
+                addDataRow(icons.phone, 'WhatsApp', hWhats, waUrl ? {
+                    url: waUrl,
+                    className: 'wa-link',
+                    title: 'Conversar no WhatsApp'
+                } : null);
+            }
 
             card.appendChild(cardBody);
             docFragment.appendChild(card);

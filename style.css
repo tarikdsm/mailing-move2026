@@ -431,6 +431,25 @@ h4 {
     /* Prevent long emails/names from breaking layout */
 }
 
+a.link-action {
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    position: relative;
+    display: inline-block;
+}
+
+a.wa-link {
+    color: #4ade80;
+    /* Green 400 */
+    font-weight: 500;
+}
+
+a.wa-link:hover {
+    color: #22c55e;
+    /* Green 500 */
+    text-decoration: underline;
+}
+
 /* Highlights in text when searched */
 mark {
     background-color: rgba(250, 204, 21, 0.2);
