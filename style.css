@@ -505,10 +505,12 @@ footer {
 /* Mobile Feedback Toast */
 .mobile-feedback {
     position: fixed;
-    bottom: var(--spacing-md);
+    bottom: 20px;
+    /* Fallback */
+    bottom: max(20px, env(safe-area-inset-bottom) + 20px);
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    z-index: 100;
+    transform: translateX(-50%) translateY(150%);
+    z-index: 9999;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
     opacity: 0;
     pointer-events: none;

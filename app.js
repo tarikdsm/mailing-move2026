@@ -288,6 +288,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth > 768) return; // Only relevant for mobile
 
         mobileResultsCountEl.textContent = count;
+
+        // Dynamically adjust position based on visual viewport (Keyboard)
+        if (window.visualViewport) {
+            const viewportHeight = window.visualViewport.height;
+            const windowHeight = window.innerHeight;
+            // Calculate how much the keyboard is taking up
+            const keyboardHeight = windowHeight - viewportHeight;
+            const bottomOffset = keyboardHeight > 0 ? keyboardHeight + 20 : 20;
+            mobileFeedbackEl.style.bottom = `${bottomOffset}px`;
+        }
+
         mobileFeedbackEl.classList.add('visible');
 
         // Auto-hide the toast after 4 seconds of inactivity
@@ -297,6 +308,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideMobileFeedback() {
         mobileFeedbackEl.classList.remove('visible');
+        // Reset timeout and style
+        setTimeout(() => {
+            if (!mobileFeedbackEl.classList.contains('visible')) {
+                mobileFeedbackEl.style.bottom = '';
+            }
+        }, 300);
+    }
+
+    // Listen to keyboard popping up and down to adjust real-time
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", () => {
+            if (mobileFeedbackEl.classList.contains('visible')) {
+                const viewportHeight = window.visualViewport.height;
+                const windowHeight = window.innerHeight;
+                const keyboardHeight = windowHeight - viewportHeight;
+                const bottomOffset = keyboardHeight > 0 ? keyboardHeight + 20 : 20;
+                mobileFeedbackEl.style.bottom = `${bottomOffset}px`;
+            }
+        });
     }
 
     // ======== Event Listeners ========
